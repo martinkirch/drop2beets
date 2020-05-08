@@ -25,10 +25,23 @@ def new_item(item, path):
     Returns:
         the item modified as you like, maybe according to path ; return None if you prefer to skip the file.
     """
-    print (item)
-    print (path)
-    print (item.get_album())
-    print("new_item done")
+    if not path:
+        return None
+
+    # remove first /
+    path = path[1:]
+    path_parts = path.split('/')
+    custom_tags = {}
+
+    if path_parts[0] == "mix":
+        custom_tags['mix'] = path_parts[1]
+    
+    if len(path_parts) == 1:
+        custom_tags['genre'] = path_parts[0]
+
+    if custom_tags:
+        print("Applying %s" % custom_tags)
+        item.update(custom_tags)
     return item
 
 
@@ -62,14 +75,10 @@ def main():
             dropbox_path = folder[len(DROPBOX):]
             item = new_item(item, dropbox_path)
             if item:
-                pass # TODO import
-                # get_library().add(item)
-                print("should move to "+item.destination())
-                # item.move()
+                get_library().add(item)
+                item.move()
+                print("\"%s\" moved to %s" % (item, item.destination()))
 
-
-# event_type=['IN_MOVED_TO'], folder=/home/martin/beets-dropbox/mix/148, filename=17 - La danse des gros.mp3
-# event_type=['IN_CLOSE_WRITE'], folder=/home/martin/beets-dropbox/mix/148, filename=Breaking E - 8m4o - 136BPM.flac
 
 if __name__ == '__main__':
     if DROPBOX[-1] == '/':
