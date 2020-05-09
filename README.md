@@ -5,10 +5,8 @@ Import singles to beets as soon as they are dropped in a folder.
 The script includes a customizable function that may allow you to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
 
-**This script's only output is in `./drop2beets.log`**.
-
-TODO link to examples
-
+The `examples` folder contains some examples of `new_item` functions you may
+adapt to your needs.
 
 ## Get started
 
@@ -28,7 +26,7 @@ If you'd like to set some tags depending of which sub-folder the file is dropped
 modify the `new_item` function.
 
 You can test by calling `./drop2beets.py` on the command line and drop a few files to add.
-Both good news and errors are always written to `./drop2beets.log`.
+**This script's only output is always in `./drop2beets.log`**.
 Hit Ctrl+C to close the script.
 
 For a longer-term installation,

@@ -23,29 +23,8 @@ def new_item(item, path):
         item: the beets Item that we're about to import
         path: its sub-folders path in our dropbox ; if the items has been dropped at the root, then it's empty.
     Returns:
-        the item modified as you like, maybe according to path ; return None if you prefer to skip the file.
+        the item modified as you like (according to path, maybe) ; return None if you don't want to import the file right now.
     """
-    if not item.artist.strip() or not item.title.strip():
-        logging.error("Missing artist or title tag")
-        return None
-    if not path:
-        logging.info("No sub-folder, leaving the file for manual import")
-        return None
-
-    # remove first /
-    path = path[1:]
-    path_parts = path.split('/')
-    custom_tags = {}
-
-    if path_parts[0] == "mix":
-        custom_tags['mix'] = path_parts[1]
-    
-    if len(path_parts) == 1:
-        custom_tags['genre'] = path_parts[0]
-
-    if custom_tags:
-        logging.info("Applying %s", custom_tags)
-        item.update(custom_tags)
     return item
 
 
