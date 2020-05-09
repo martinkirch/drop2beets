@@ -36,8 +36,8 @@ systemctl --user enable drop2beets
 echo "All done ! Drop2beets is running and will run again when rebooting."
 echo ""
 echo "You can run"
-echo "    systemctl --user start|stop|status drop2beets"
-echo "to start/stop/see the service, and"
+echo "    systemctl --user start|stop|restart|status drop2beets"
+echo "to start/stop/restart/see the service, and"
 echo "    systemctl --user disable drop2beets'"
 echo "to remove the service from startup."
 
