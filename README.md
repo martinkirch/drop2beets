@@ -10,21 +10,17 @@ or custom attributes depending on the sub-folder in which the file has been drop
 TODO link to examples
 
 
-## Examples wanted !
-
-I'd be happy to include your own variations of this script in the `examples`
-folder, feel free to post them in Issues or Pull Requests.
-
-## Get started
+## Get started
 
 You'll need Python3 on a Linux box, and obviously an existing [Beets](http://beets.io/) library.
 
-    :::bash
-    git clone git@github.com:martinkirch/drop2beets.git
-    cd drop2beets/
-    python3 -m venv drop2beets
-    source drop2beets/bin/activate
-    pip install -e .
+```bash
+git clone git@github.com:martinkirch/drop2beets.git
+cd drop2beets/
+python3 -m venv drop2beets
+source drop2beets/bin/activate
+pip install -e .
+```
 
 Then, adapt `drop2beets.py` to your needs and machine.
 You need to at least to change `BEETS_PATH`, `BEETS_DIRECTORY` and `DROPBOX`.
@@ -32,13 +28,17 @@ If you'd like to set some tags depending of which sub-folder the file is dropped
 modify the `new_item` function.
 
 You can test by calling `./drop2beets.py` on the command line and drop a few files to add.
-Hit Ctrl+C to close the script.
 Both good news and errors are always written to `./drop2beets.log`.
+Hit Ctrl+C to close the script.
 
 For a longer-term installation,
+you can install it as a user-lever systemd service by running `./install_service.sh`
+(in a shell where the virtual environment is activated).
 
-    :::bash
-    sudo cp drop2beets.sh /etc/init.d/
-    sudo update-rc.d drop2beets.sh defaults
-    sudo service drop2beets.sh start
+Note that you'll have to restart the service when you update the `new_item` function.
 
+
+## Examples wanted !
+
+I'd be happy to include your own variations of this script or the `new_item` function
+in the `examples` folder, feel free to post them in Issues or Pull Requests.
