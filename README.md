@@ -13,7 +13,7 @@ adapt to your needs.
 You'll need Python3 on a Linux box, and obviously an existing [Beets](http://beets.io/) library.
 
 ```bash
-git clone git@github.com:martinkirch/drop2beets.git
+git clone https://github.com/martinkirch/drop2beets.git
 cd drop2beets/
 python3 -m venv drop2beets
 source drop2beets/bin/activate
