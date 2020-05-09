@@ -1,6 +1,6 @@
 # drop2beets
 
-Import singles to beets as soon as they are dropped in a folder.
+Import singles to [Beets](http://beets.io/) as soon as they are dropped in a folder.
 
 The script includes a customizable function that may allow you to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
@@ -10,7 +10,7 @@ adapt to your needs.
 
 ## Get started
 
-You'll need Python3 on a Linux box, and obviously an existing [Beets](http://beets.io/) library.
+You'll need Python3 on a Linux box, and obviously an existing Beets library.
 
 ```bash
 git clone https://github.com/martinkirch/drop2beets.git
