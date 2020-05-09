@@ -20,6 +20,6 @@ def new_item(item, path):
     path_parts = path.split('/')
 
     if len(path_parts) == 2 and path_parts[0] == "mood":
-        logging.info("Setting mood=", path_parts[1])
+        logging.info("Setting mood=%s", path_parts[1])
         item.update({'mood': path_parts[1]})
     return item
