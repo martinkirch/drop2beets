@@ -1,5 +1,5 @@
-beets_inotify/
-beets-inotify.log
+drop2beets/
+drop2beets.log
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
