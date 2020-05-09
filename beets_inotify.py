@@ -25,7 +25,11 @@ def new_item(item, path):
     Returns:
         the item modified as you like, maybe according to path ; return None if you prefer to skip the file.
     """
+    if not item.artist.strip() or not item.title.strip():
+        logging.error("Missing artist or title tag")
+        return None
     if not path:
+        logging.info("No sub-folder, leaving the file for manual import")
         return None
 
     # remove first /
@@ -40,13 +44,14 @@ def new_item(item, path):
         custom_tags['genre'] = path_parts[0]
 
     if custom_tags:
-        print("Applying %s" % custom_tags)
+        logging.info("Applying %s", custom_tags)
         item.update(custom_tags)
     return item
 
 
 
 ###############################################################################
+import logging
 
 from beets.library import Library, Item
 from inotify.adapters import InotifyTree
@@ -56,9 +61,17 @@ def get_library():
     return Library(path=BEETS_PATH, directory=BEETS_DIRECTORY)
 
 def main():
+    logging.basicConfig(
+        filename=__file__.replace(".py", ".log"),
+        level=logging.INFO,
+        format="%(asctime)s [%(filename)s:%(lineno)s] %(levelname)s %(message)s"
+    )
     # to ensure integrity we'll re-open the library for each item to be imported,
     # but before doing anything else let's check the lib exists
     _ = get_library()
+
+    logging.info("Beets library found")
+    logging.info("Starting to monitor %s, put some files inside !", DROPBOX)
 
     i = InotifyTree(DROPBOX)
     for event in i.event_gen():
@@ -71,13 +84,20 @@ def main():
             continue
         #print("event_type=%s, folder=%s, filename=%s" % (event_type, folder, filename))
         if 'IN_MOVED_TO' in event_type or 'IN_CLOSE_WRITE' in event_type:
-            item = Item.from_path("%s/%s" % (folder, filename))
+            try:
+                item = Item.from_path("%s/%s" % (folder, filename))
+            except Exception as exc:
+                logging.critical("Cannot process %s because of", filename)
+                logging.exception(exc, stack_info=False)
+                continue
+
+            logging.info("Processing %s", filename)
             dropbox_path = folder[len(DROPBOX):]
             item = new_item(item, dropbox_path)
             if item:
                 get_library().add(item)
                 item.move()
-                print("\"%s\" moved to %s" % (item, item.destination()))
+                logging.info("\"%s\" moved to %s", item, item.destination())
 
 
 if __name__ == '__main__':

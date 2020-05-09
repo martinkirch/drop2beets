@@ -5,6 +5,8 @@ Import singles to beets as soon as they are dropped in a folder.
 The script includes a customizable function that may allow you to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
 
+**This script tells its whole life in `./beets_inotify.log` and anywhere else**.
+
 TODO link to examples
 
 
@@ -31,4 +33,6 @@ modify the `new_item` function.
 
 You can test by calling `./beets_inotify.py` on the command line and drop a few files to add.
 Hit Ctrl+C to close the script.
+Both good news and errors are always written to `./beets_inotify.log`.
+
 For a longer-term installation, TODO
