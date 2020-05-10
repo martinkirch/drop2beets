@@ -40,7 +40,7 @@ pip install -e .
 Then, adapt `drop2beets.py` to your needs and machine.
 You need to at least to change `BEETS_PATH`, `BEETS_DIRECTORY` and `DROPBOX`.
 If you'd like to set some tags depending of which sub-folder the file is dropped in,
-modify the `new_item` function.
+modify the `new_item` function (see our `examples` folder).
 
 You can test by calling `./drop2beets.py` on the command line and drop a few files to add.
 **This script's only output is always in `./drop2beets.log`**.

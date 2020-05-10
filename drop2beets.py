@@ -23,9 +23,9 @@ def new_item(item, path):
         item: the beets Item that we're about to import
         path: its sub-folders path in our dropbox ; if the items has been dropped at the root, then it's empty.
     Returns:
-        the item modified as you like (according to path, maybe) ; return None if you don't want to import the file right now.
+        A dict of custom attributes (according to path, maybe) ; return None if you don't want to import the file right now.
     """
-    return item
+    return {}
 
 
 
@@ -50,29 +50,34 @@ class Drop2BeetsPlugin(BeetsPlugin):
     def on_import_begin(self, session):
         session.config['singletons'] = True
         session.config['import']['quiet'] = True
+        self.attributes = None
 
     def on_import_task_created(self, task, session):
         path = task.item.path
         folder = os.path.dirname(path)
         dropbox_path = folder[len(DROPBOX):]
-        item = new_item(task.item, dropbox_path)
-        if item:
-            return [task]
-        else:
+        self.attributes = new_item(task.item, dropbox_path)
+        if self.attributes is None:
             return []
+        else:
+            return [task]
 
     def on_item_imported(self, lib, item):
         if self.attributes:
-            pass
+            __logger.info("Applying %s", self.attributes)
+            item.update(self.attributes)
 
 
 def get_library():
     return Library(path=BEETS_PATH, directory=BEETS_DIRECTORY)
 
+__logger = logging.getLogger("drop2beets")
+__logger.setLevel(logging.INFO)
+
 def main():
     logging.basicConfig(
         filename=__file__.replace(".py", ".log"),
-        level=logging.INFO,
+        level=logging.WARNING,
         format="%(asctime)s [%(filename)s:%(lineno)s] %(levelname)s %(message)s"
     )
     # to ensure integrity we'll re-open the library for each item to be imported,
@@ -80,8 +85,8 @@ def main():
     _ = get_library()
     plugin = Drop2BeetsPlugin()
 
-    logging.info("Beets library found")
-    logging.info("Starting to monitor %s, put some files inside !", DROPBOX)
+    __logger.info("Beets library found")
+    __logger.info("Starting to monitor %s, put some files inside !", DROPBOX)
 
     i = InotifyTree(DROPBOX)
     for event in i.event_gen():
@@ -94,7 +99,7 @@ def main():
             continue
         #print("event_type=%s, folder=%s, filename=%s" % (event_type, folder, filename))
         if 'IN_MOVED_TO' in event_type or 'IN_CLOSE_WRITE' in event_type:
-            logging.info("Processing %s", filename)
+            __logger.info("Processing %s", filename)
             full_path = "%s/%s" % (folder, filename)
             import_files(get_library(), [full_path], None)
 

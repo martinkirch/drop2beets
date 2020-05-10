@@ -26,10 +26,10 @@ def new_item(item, path):
 
     Dropping a file in the root folder `my-beets-dropbox` would do nothing
     because of the test on the 3 first lines. In that case we could also just
-    `return item` to still import it and leave tags untouched.
+    `return {}` to still import it and leave tags untouched.
     """
     if not path:
-        logging.info("No sub-folder, leaving the file for manual import")
+        __logger.info("No sub-folder, leaving the file for manual import")
         return None
 
     # remove first /
@@ -43,7 +43,4 @@ def new_item(item, path):
     if len(path_parts) >= 2 and len(path_parts[1]) == 3:
         custom_tags['language'] = path_parts[1]
 
-    if custom_tags:
-        logging.info("Applying %s", custom_tags)
-        item.update(custom_tags)
-    return item
+    return custom_tags

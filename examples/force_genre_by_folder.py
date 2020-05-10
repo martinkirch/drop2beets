@@ -20,7 +20,7 @@ def new_item(item, path):
     `return item` to still import it and leave `genre` untouched.
     """
     if not path:
-        logging.info("No sub-folder, leaving the file for manual import")
+        __logger.info("No sub-folder, leaving the file for manual import")
         return None
 
     # remove first /
@@ -31,7 +31,4 @@ def new_item(item, path):
     if len(path_parts) == 1:
         custom_tags['genre'] = path_parts[0]
 
-    if custom_tags:
-        logging.info("Applying %s", custom_tags)
-        item.update(custom_tags)
-    return item
+    return custom_tags
