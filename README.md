@@ -1,16 +1,33 @@
 # drop2beets
 
 Import singles to [Beets](http://beets.io/) as soon as they are dropped in a folder.
+We use Beets' auto-tagger in quiet mode.
 
 The script includes a customizable function that may allow you to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
-
 The `examples` folder contains some examples of `new_item` functions you may
 adapt to your needs.
+
 
 ## Get started
 
 You'll need Python3 on a Linux box, and obviously an existing Beets library.
+We advise you set Beets' `quiet_fallback` configuration option:
+
+```yaml
+import:
+    quiet_fallback: asis
+```
+
+This parameter tells Beets what to do when the auto-tagger is not sure about
+the song's identifiaction :
+set it to `skip` to abort the importation in case of ambiguity,
+or `asis` to import using tags as they are in the incoming file.
+This will avoid surprises in case of ambiguous matches,
+because this script invokes Beet's auto-tagger in quiet mode (as `beet import -q`)
+after your custom function.
+
+To install `drop2beets` itself,
 
 ```bash
 git clone https://github.com/martinkirch/drop2beets.git

@@ -31,9 +31,39 @@ def new_item(item, path):
 
 ###############################################################################
 import logging
+import os
 
-from beets.library import Library, Item
+from beets.ui.commands import import_files
+from beets.plugins import BeetsPlugin
+from beets.library import Library
 from inotify.adapters import InotifyTree
+
+
+class Drop2BeetsPlugin(BeetsPlugin):
+    def __init__(self):
+        super(Drop2BeetsPlugin, self).__init__()
+        self.register_listener('import_begin', self.on_import_begin)
+        self.register_listener('import_task_created', self.on_import_task_created)
+        self.register_listener('item_imported', self.on_item_imported)
+        self.attributes = None
+
+    def on_import_begin(self, session):
+        session.config['singletons'] = True
+        session.config['import']['quiet'] = True
+
+    def on_import_task_created(self, task, session):
+        path = task.item.path
+        folder = os.path.dirname(path)
+        dropbox_path = folder[len(DROPBOX):]
+        item = new_item(task.item, dropbox_path)
+        if item:
+            return [task]
+        else:
+            return []
+
+    def on_item_imported(self, lib, item):
+        if self.attributes:
+            pass
 
 
 def get_library():
@@ -48,6 +78,7 @@ def main():
     # to ensure integrity we'll re-open the library for each item to be imported,
     # but before doing anything else let's check the lib exists
     _ = get_library()
+    plugin = Drop2BeetsPlugin()
 
     logging.info("Beets library found")
     logging.info("Starting to monitor %s, put some files inside !", DROPBOX)
@@ -63,20 +94,9 @@ def main():
             continue
         #print("event_type=%s, folder=%s, filename=%s" % (event_type, folder, filename))
         if 'IN_MOVED_TO' in event_type or 'IN_CLOSE_WRITE' in event_type:
-            try:
-                item = Item.from_path("%s/%s" % (folder, filename))
-            except Exception as exc:
-                logging.critical("Cannot process %s because of", filename)
-                logging.exception(exc, stack_info=False)
-                continue
-
             logging.info("Processing %s", filename)
-            dropbox_path = folder[len(DROPBOX):]
-            item = new_item(item, dropbox_path)
-            if item:
-                get_library().add(item)
-                item.move()
-                logging.info("\"%s\" moved to %s", item, item.destination())
+            full_path = "%s/%s" % (folder, filename)
+            import_files(get_library(), [full_path], None)
 
 
 if __name__ == '__main__':
