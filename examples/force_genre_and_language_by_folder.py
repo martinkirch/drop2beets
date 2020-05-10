@@ -29,7 +29,7 @@ def new_item(item, path):
     `return {}` to still import it and leave tags untouched.
     """
     if not path:
-        __logger.info("No sub-folder, leaving the file for manual import")
+        _logger.info("No sub-folder, leaving the file for manual import")
         return None
 
     # remove first /

@@ -4,7 +4,7 @@ def new_item(item, path):
     "Artist" and "Title" tags - otherwise, it's not imported and left in the folder.
     """
     if not item.artist.strip() or not item.title.strip():
-        __logger.error("Missing artist or title tag")
+        _logger.error("Missing artist or title tag")
         return None
 
     return item
