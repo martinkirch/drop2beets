@@ -1,4 +1,4 @@
-def new_item(item, path):
+def on_item(item, path):
     """
     This example sets the "Genre" tag at importation depending on which folder
     the file has been dropped in.

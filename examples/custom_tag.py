@@ -1,4 +1,4 @@
-def new_item(item, path):
+def on_item(item, path):
     """
     In this example we'd like to set a flexible attribute
     (see http://beets.io/blog/flexattr.html), only for files

@@ -1,4 +1,4 @@
-def new_item(item, path):
+def on_item(item, path):
     """
     This is a variant of `force_genre_by_folder.py` where we may also force
     the `language` using a sub-subfolder.
