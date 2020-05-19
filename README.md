@@ -30,16 +30,19 @@ drop2beets:
     dropbox_path: ~/beets-dropbox
 ```
 
-We advise you set Beets' `quiet_fallback` configuration option:
+We advise you configure Beets to always move files out of the Dropbox,
+and set `quiet_fallback`:
 
 ```yaml
 import:
+    move: yes
+    copy: no
     quiet_fallback: asis
 ```
 
-This parameter tells Beets what to do when the auto-tagger is not sure about
-the song's identifiaction :
-set it to `skip` to abort the importation in case of ambiguity,
+`quiet_fallback` tells Beets what to do when the auto-tagger is not sure about
+the song's identifiaction.
+Set it to `skip` to abort the importation in case of ambiguity,
 or `asis` to import using tags as they are in the incoming file.
 This will avoid surprises in case of ambiguous matches,
 because this script invokes Beet's auto-tagger in quiet mode (as `beet import -q`)
@@ -47,7 +50,7 @@ after your custom function.
 
 This function is `on_item`. It is written in Python,
 and lets you set some tags depending of which sub-folder the file is dropped in.
-If you want one, define it in the configuration:
+If you want one, define it in the configuration from this template:
 
 ```yaml
 drop2beets:
