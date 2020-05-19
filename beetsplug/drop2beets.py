@@ -24,7 +24,7 @@ ExecStart={beet_path} dropbox
 Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 """
 
 class Drop2BeetsPlugin(BeetsPlugin):
@@ -113,7 +113,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
             format="%(asctime)s [%(filename)s:%(lineno)s] %(levelname)s %(message)s"
         )
         beet_path = subprocess.getoutput("which beet")
-        print("beet found in %s", beet_path)
+        print("beet found in %s" % beet_path)
         with open("drop2beets.service", "w") as service_file:
             service_file.write(_SERVICE_TEMPLATE.format(beet_path=beet_path))
 
@@ -123,9 +123,10 @@ class Drop2BeetsPlugin(BeetsPlugin):
         subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
         subprocess.run(["systemctl", "--user", "start", "drop2beets"], check=True)
         subprocess.run(["systemctl", "--user", "enable", "drop2beets"], check=True)
+        subprocess.run(["loginctl", "enable-linger", os.getlogin()], check=True)
 
         print("""
-        All done ! Drop2beets is running and will run again when rebooting.
+        All done ! Drop2beets is running and will run again when rebooting (we enabled systemd's lingering)
 
         You can run
             systemctl --user start|stop|restart|status drop2beets
