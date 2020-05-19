@@ -63,14 +63,16 @@ class Drop2BeetsPlugin(BeetsPlugin):
         dropbox_path = folder[len(self.dropbox_path):]
         self.attributes = self.on_item(task.item, dropbox_path)
         if self.attributes is None:
+            _logger.info("Importation aborted by on_item")
             return []
         else:
+            _logger.info("Applying %s", self.attributes)
             return [task]
 
     def on_item_imported(self, lib, item):
         if self.attributes:
-            _logger.info("Applying %s", self.attributes)
             item.update(self.attributes)
+            item.store()
 
     def _main(self, lib, opts, args):
         try:
@@ -90,6 +92,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
         self.register_listener('item_imported', self.on_item_imported)
 
         i = InotifyTree(self.dropbox_path)
+        _logger.info("Drop2beets starting to watch %s", self.dropbox_path)
         for event in i.event_gen():
             if event is None:
                 continue
