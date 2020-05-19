@@ -31,11 +31,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
 
     def __init__(self):
         super(Drop2BeetsPlugin, self).__init__()
-        self.register_listener('import_begin', self.on_import_begin)
-        self.register_listener('import_task_created', self.on_import_task_created)
-        self.register_listener('item_imported', self.on_item_imported)
         self.attributes = None
-
         self.dropbox_path = self.config['dropbox_path'].as_filename()
 
         try:
@@ -88,6 +84,10 @@ class Drop2BeetsPlugin(BeetsPlugin):
         )
         _logger.setLevel(logging.INFO)
         logging.getLogger('beets').addHandler(logging.getLogger().handlers[0])
+
+        self.register_listener('import_begin', self.on_import_begin)
+        self.register_listener('import_task_created', self.on_import_task_created)
+        self.register_listener('item_imported', self.on_item_imported)
 
         i = InotifyTree(self.dropbox_path)
         for event in i.event_gen():
