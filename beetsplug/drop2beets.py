@@ -131,6 +131,6 @@ class Drop2BeetsPlugin(BeetsPlugin):
         You can run
             systemctl --user start|stop|restart|status drop2beets
         to start/stop/restart/see the service, and
-            systemctl --user disable drop2beets'
+            systemctl --user disable drop2beets
         to remove the service from startup.
         """)
