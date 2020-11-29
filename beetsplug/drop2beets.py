@@ -9,7 +9,6 @@ from beets import config
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand
 from beets.ui.commands import import_files
-from beets.util.confit import NotFoundError
 
 
 _logger = logging.getLogger("drop2beets")
@@ -37,7 +36,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
         try:
             exec(self.config['on_item'].get(), globals())
             self.on_item = on_item
-        except NotFoundError:
+        except:
             self.on_item = lambda item, path: dict()
 
         self._command_dropbox = Subcommand('dropbox',
@@ -77,7 +76,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
     def _main(self, lib, opts, args):
         try:
             log_path = self.config['log_path'].as_filename()
-        except NotFoundError:
+        except:
             log_path = None
         logging.basicConfig(
             filename=log_path,
