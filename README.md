@@ -1,14 +1,15 @@
 # drop2beets
 
-Import singles to [Beets](http://beets.io/) as soon as they are dropped in a folder.
-We use Beets' auto-tagger in quiet mode,
-and [inotify](https://pypi.org/project/inotify/) to detect dropped files.
+A [Beets](http://beets.io/) plug-in that imports singles as soon as they are dropped in a folder.
 
 You can provide a function to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
-The `examples` folder contains some examples of `on_item` functions you may
+The [examples](https://github.com/martinkirch/drop2beets/tree/master/examples)
+folder contains some examples of `on_item` functions you may
 adapt to your needs.
 
+We use Beets' auto-tagger in quiet mode,
+and [inotify](https://pypi.org/project/inotify/) to detect dropped files.
 
 ## Get started
 

@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "drop2beets"
+version = "1.0.0-alpha1"
+description = "Import singles to Beets as soon as they are dropped in a folder"
+authors = ["Martin Kirchgessner <martin.kirch@gmail.com>"]
+license = "WTFPL"
+readme = "README.md"
+homepage = "https://github.com/martinkirch/drop2beets"
+repository = "https://github.com/martinkirch/drop2beets.git"
+keywords = ["radio", "liquidsoap"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: WTFPL",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Multimedia :: Sound/Audio"
+]
+packages = [
+    { include = "beetsplug" },
+    { include = "examples" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+inotify = "^0.2.10"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
