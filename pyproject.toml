@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drop2beets"
-version = "1.0.0-alpha1"
+version = "1.0.0"
 description = "Import singles to Beets as soon as they are dropped in a folder"
 authors = ["Martin Kirchgessner <martin.kirch@gmail.com>"]
 license = "WTFPL"
@@ -10,7 +10,6 @@ repository = "https://github.com/martinkirch/drop2beets.git"
 keywords = ["radio", "liquidsoap"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: WTFPL",
     "Operating System :: POSIX :: Linux",
     "Topic :: Multimedia :: Sound/Audio"
 ]
