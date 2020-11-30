@@ -1,7 +1,8 @@
 # drop2beets
 
 Import singles to [Beets](http://beets.io/) as soon as they are dropped in a folder.
-We use Beets' auto-tagger in quiet mode.
+We use Beets' auto-tagger in quiet mode,
+and [inotify](https://pypi.org/project/inotify/) to detect dropped files.
 
 You can provide a function to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
@@ -12,13 +13,10 @@ adapt to your needs.
 ## Get started
 
 You'll need Python3 on a Linux box, and obviously an existing Beets library.
-If you installed Beets in a virtual environment, activate it first.
-Clone and install the plug-in:
+Run:
 
 ```bash
-git clone https://github.com/martinkirch/drop2beets.git
-cd drop2beets/
-pip install -e .
+pip install drop2beets
 ```
 
 Enable and configure the plug-in by running `beet config -e` and set at least
@@ -86,4 +84,7 @@ Note that you'll have to restart the service when you update the `on_item` funct
 ## Examples wanted !
 
 I'd be happy to include your own variations of this script or the `on_item` function
-in the `examples` folder, feel free to post them in Issues or Pull Requests.
+in the [examples](https://github.com/martinkirch/drop2beets/tree/master/examples) folder, 
+feel free to post them in
+[Issues](https://github.com/martinkirch/drop2beets/issues) or
+[Pull Requests](https://github.com/martinkirch/drop2beets/pulls).
