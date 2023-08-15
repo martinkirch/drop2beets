@@ -1,9 +1,11 @@
+from __future__ import annotations
 import logging
 import os
 import subprocess
 from os.path import expanduser
 
-from inotify.adapters import InotifyTree
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler, FileSystemEvent, FileCreatedEvent, FileMovedEvent
 
 from beets import config
 from beets.plugins import BeetsPlugin
@@ -25,6 +27,24 @@ Restart=on-failure
 [Install]
 WantedBy=default.target
 """
+
+class Drop2BeetsHandler(FileSystemEventHandler):
+    def __init__(self, lib):
+        self.lib = lib
+        super().__init__()
+
+    def on_any_event(self, event:FileSystemEvent):
+        _logger.info("got %r", event)
+        if event and not event.is_directory:
+            if isinstance(event, FileMovedEvent):
+                fullpath = event.dest_path
+            elif isinstance(event, FileCreatedEvent):
+                fullpath = event.src_path
+            else:
+                return
+            _logger.info("Processing %s", fullpath)
+            import_files(self.lib, [fullpath], None)
+
 
 class Drop2BeetsPlugin(BeetsPlugin):
 
@@ -90,21 +110,12 @@ class Drop2BeetsPlugin(BeetsPlugin):
         self.register_listener('import_task_created', self.on_import_task_created)
         self.register_listener('item_imported', self.on_item_imported)
 
-        i = InotifyTree(self.dropbox_path)
+        self.observer = Observer()
+        handler = Drop2BeetsHandler(lib)
+        self.observer.schedule(handler, self.dropbox_path, recursive=True)
         _logger.info("Drop2beets starting to watch %s", self.dropbox_path)
-        for event in i.event_gen():
-            if event is None:
-                continue
-            event_type = event[1]
-            folder = event[2]
-            filename = event[3]
-            if 'IN_ISDIR' in event_type:
-                continue
-            #print("event_type=%s, folder=%s, filename=%s" % (event_type, folder, filename))
-            if 'IN_MOVED_TO' in event_type or 'IN_CLOSE_WRITE' in event_type:
-                _logger.info("Processing %s", filename)
-                full_path = "%s/%s" % (folder, filename)
-                import_files(lib, [full_path], None)
+        self.observer.start()
+        self.observer.join()
 
     def _install(self, lib, opts, args):
         logging.basicConfig(
