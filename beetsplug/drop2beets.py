@@ -55,7 +55,7 @@ class Drop2BeetsHandler(FileSystemEventHandler):
                     break # exploit the fact that dict entries are sorted by insertion order
 
     def on_any_event(self, event:FileSystemEvent):
-        _logger.info("got %r", event)
+        _logger.debug("got %r", event)
         self.forget_debounce()
         if event and not event.is_directory:
             if isinstance(event, FileMovedEvent):
