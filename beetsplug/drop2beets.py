@@ -3,9 +3,11 @@ import logging
 import os
 import subprocess
 from os.path import expanduser
+from time import time
+from collections import OrderedDict
 
 from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent, FileCreatedEvent, FileMovedEvent
+from watchdog.events import FileSystemEventHandler, FileSystemEvent, FileClosedEvent, FileMovedEvent
 
 from beets import config
 from beets.plugins import BeetsPlugin
@@ -29,17 +31,41 @@ WantedBy=default.target
 """
 
 class Drop2BeetsHandler(FileSystemEventHandler):
+    # We must debounce the FileClosedEvent because it fires again right after
+    # `import_files`, maybe because beets writes tags before moving the file.
+    # It's compared to time() deltas to it's measured in seconds; it's set
+    # to the time that might take a looooong single import.
+    DEBOUNCE_WINDOW = 10
+
     def __init__(self, lib):
         self.lib = lib
+        self.debounce = OrderedDict()
         super().__init__()
+
+    def forget_debounce(self):
+        """
+        remove paths from the debounce window
+        """
+        if self.debounce:
+            limit = time() - self.DEBOUNCE_WINDOW
+            for path, timestamp in list(self.debounce.items()):
+                if timestamp <= limit:
+                    del self.debounce[path]
+                else:
+                    break # exploit the fact that dict entries are sorted by insertion order
 
     def on_any_event(self, event:FileSystemEvent):
         _logger.info("got %r", event)
+        self.forget_debounce()
         if event and not event.is_directory:
             if isinstance(event, FileMovedEvent):
                 fullpath = event.dest_path
-            elif isinstance(event, FileCreatedEvent):
+            elif isinstance(event, FileClosedEvent):
                 fullpath = event.src_path
+                if fullpath in self.debounce:
+                    return
+                else:
+                    self.debounce[fullpath] = time()
             else:
                 return
             _logger.info("Processing %s", fullpath)

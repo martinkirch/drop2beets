@@ -22,6 +22,9 @@ packages = [
 python = "^3.7"
 watchdog = "^3.0.0"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
