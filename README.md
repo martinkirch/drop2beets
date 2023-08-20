@@ -13,7 +13,7 @@ and [inotify](https://pypi.org/project/inotify/) to detect dropped files.
 
 ## Get started
 
-You'll need Python3 on a Linux box, and obviously an existing Beets library.
+You'll need Python3 and an existing Beets library.
 Run:
 
 ```bash
@@ -76,9 +76,8 @@ drop2beets:
     log_path: ~/drop2beets/log.log
 ```
 
-And install this as a user-lever systemd service by running `beet install_dropbox`
+Linux users can install this as a user-lever systemd service by running `beet install_dropbox`
 (in a shell where the virtual environment is activated).
-
 Note that you'll have to restart the service when you update the `on_item` function.
 
 
