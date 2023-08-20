@@ -148,7 +148,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
         _logger.info("Drop2beets starting to watch %s", self.dropbox_path)
         self.observer.start()
         try:
-            while self.observer.isAlive():
+            while self.observer.is_alive():
                 self.observer.join(1)
                 handler.try_to_import()
         finally:
