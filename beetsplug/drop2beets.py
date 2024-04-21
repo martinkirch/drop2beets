@@ -109,6 +109,9 @@ class Drop2BeetsPlugin(BeetsPlugin):
         self.attributes = None
 
     def on_import_task_created(self, task, session):
+        # Some ImportTasks, like progress updates, have no item; ignore them
+        if not hasattr(task, 'item'):
+            return [task]
         path = str(task.item.path, 'utf-8', 'ignore')
         folder = os.path.dirname(path)
         dropbox_path = folder[len(self.dropbox_path):]
