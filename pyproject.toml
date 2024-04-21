@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drop2beets"
-version = "2.0.0"
+version = "2.0.1"
 description = "Import singles to Beets as soon as they are dropped in a folder"
 authors = ["Martin Kirchgessner <martin.kirch@gmail.com>"]
 license = "WTFPL"
