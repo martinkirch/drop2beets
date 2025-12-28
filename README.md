@@ -21,12 +21,15 @@ pip install drop2beets
 ```
 
 Enable and configure the plug-in by running `beet config -e` and set at least
-the path to the "dropbox" folder.
+one of default or singleton path to the "dropbox" folder.
 
 ```yaml
 plugins: drop2beets
 drop2beets:
-    dropbox_path: ~/beets-dropbox
+    debounce_window: 10 # Seconds to wait for events to stop before importing. Should be set to at least 60 when importing albums. Default: 10
+    dropbox_paths:
+        default: ~/beets-dropbox/albums
+        singleton: ~/beets-dropbox/singles
 ```
 
 We advise you configure Beets to always move files out of the Dropbox,
