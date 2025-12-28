@@ -83,7 +83,11 @@ class Drop2BeetsPlugin(BeetsPlugin):
         super(Drop2BeetsPlugin, self).__init__()
         self.observer = None
         self.attributes = None
-        self.dropbox_path = self.config['dropbox_path'].as_filename()
+        self.dropbox_paths = {
+            key: p.as_filename()
+            for key in ['default', 'singleton']
+            if (p := self.config['dropbox_paths'][key]).exists()
+        }
 
         try:
             exec(self.config['on_item'].get(), globals())
@@ -93,7 +97,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
 
         self._command_dropbox = Subcommand('dropbox',
             help="Start watching %s for files to import automatically" %
-                self.dropbox_path)
+                self.dropbox_paths.values())
         self._command_dropbox.func = self._main
 
         self._command_install = Subcommand('install_dropbox',
@@ -104,18 +108,35 @@ class Drop2BeetsPlugin(BeetsPlugin):
         return [self._command_dropbox, self._command_install]
 
     def on_import_begin(self, session):
-        session.config['singletons'] = True
+        if not session.config['singletons']:
+            # If this is an album, ignore the missing_tracks penalty because tracks are being imported one by one
+            if 'distance_weights' not in config['match']: config['match']['distance_weights'] = {}
+            config['match']['distance_weights']['missing_tracks'] = 0.0
+            # Also set duplicate_action to merge otherwise it will end up in a duplicate-skip because tracks are being imported one by one
+            config['import']['duplicate_action'] = 'merge'
         config['import']['quiet'] = True
         self.attributes = None
 
     def on_import_task_created(self, task, session):
-        # Some ImportTasks, like progress updates, have no item; ignore them
-        if not hasattr(task, 'item'):
+        if hasattr(task, 'item'):
+            item = task.item
+        elif hasattr(task, 'items') and len(task.items) > 0:
+            item = task.items[0]
+        else:
+            # Some ImportTasks, like progress updates, have no item; ignore them
             return [task]
-        path = str(task.item.path, 'utf-8', 'ignore')
+
+        path = str(item.path, 'utf-8', 'ignore')
+        path_type = self._get_path_type(path)
+
+        if not path_type:
+            _logger.warn("Path type for %s not found", path)
+            return [task]
+
+        session.config['singletons'] = path_type == 'singleton'
         folder = os.path.dirname(path)
-        dropbox_path = folder[len(self.dropbox_path):]
-        self.attributes = self.on_item(task.item, dropbox_path)
+        dropbox_path = folder[len(self.dropbox_paths[path_type]):]
+        self.attributes = self.on_item(item, dropbox_path)
         if self.attributes is None:
             _logger.info("Importation aborted by on_item")
             return []
@@ -147,8 +168,9 @@ class Drop2BeetsPlugin(BeetsPlugin):
 
         self.observer = Observer()
         handler = Drop2BeetsHandler(lib)
-        self.observer.schedule(handler, self.dropbox_path, recursive=True)
-        _logger.info("Drop2beets starting to watch %s", self.dropbox_path)
+        for _, path in self.dropbox_paths.items():
+            self.observer.schedule(handler, path, recursive=True)
+            _logger.info("Drop2beets starting to watch %s", path)
         self.observer.start()
         try:
             while self.observer.is_alive():
@@ -185,3 +207,10 @@ class Drop2BeetsPlugin(BeetsPlugin):
             systemctl --user disable drop2beets
         to remove the service from startup.
         """)
+
+    def _get_path_type(self, path):
+        for path_type, path_value in self.dropbox_paths.items():
+            if path.startswith(path_value):
+                return path_type
+
+        return None
