@@ -10,7 +10,11 @@ from watchdog.events import FileSystemEventHandler, FileSystemEvent, FileMovedEv
 
 from beets import config
 from beets.plugins import BeetsPlugin
-from beets.ui import Subcommand, commands
+from beets.ui import Subcommand
+try:
+    from beets.ui.commands.import_ import import_files
+except ImportError:
+    from beets.ui.commands import import_files
 
 
 _logger = logging.getLogger("drop2beets")
@@ -63,7 +67,7 @@ class Drop2BeetsHandler(FileSystemEventHandler):
                 elif timestamp <= limit:
                     self.debounce[path] = -1
                     _logger.info("Processing %s", path)
-                    commands.import_files(self.lib, [path], None)
+                    import_files(self.lib, [path], None)
 
     def on_any_event(self, event:FileSystemEvent):
         _logger.debug("got %r", event)
