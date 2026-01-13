@@ -14,6 +14,7 @@ from beets.ui import Subcommand
 try:
     from beets.ui.commands.import_ import import_files
 except ImportError:
+    # for beets<=2.5.1:
     from beets.ui.commands import import_files
 
 
