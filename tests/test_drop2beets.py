@@ -1,6 +1,5 @@
 from time import sleep
 from watchdog.events import FileSystemEvent, FileMovedEvent
-from beets.ui import commands
 from beetsplug.drop2beets import Drop2BeetsHandler
 
 def test_debounce(monkeypatch):
@@ -13,7 +12,7 @@ def test_debounce(monkeypatch):
         # the following flag shows that import has started: future events should be ignored
         # also, we expect exactly one path here
         assert handler.debounce[imported_paths[0]] < 0
-    monkeypatch.setattr(commands, "import_files", fake_import)
+    monkeypatch.setattr("beetsplug.drop2beets.import_files", fake_import)
 
     imported_paths = None
     handler.try_to_import()
