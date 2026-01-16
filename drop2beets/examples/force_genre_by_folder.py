@@ -1,4 +1,9 @@
-def on_item(item, path):
+import logging
+
+log = logging.getLogger("drop2beets")
+
+
+def on_item(_item, path):
     """
     This example sets the "Genre" tag at importation depending on which folder
     the file has been dropped in.
@@ -20,15 +25,15 @@ def on_item(item, path):
     `return item` to still import it and leave `genre` untouched.
     """
     if not path:
-        _logger.info("No sub-folder, leaving the file for manual import")
+        log.info("No sub-folder, leaving the file for manual import")
         return None
 
     # remove first /
     path = path[1:]
-    path_parts = path.split('/')
+    path_parts = path.split("/")
     custom_tags = {}
 
     if len(path_parts) == 1:
-        custom_tags['genre'] = path_parts[0]
+        custom_tags["genre"] = path_parts[0]
 
     return custom_tags

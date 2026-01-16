@@ -1,4 +1,9 @@
-def on_item(item, path):
+import logging
+
+log = logging.getLogger("drop2beets")
+
+
+def on_item(_item, path):
     """
     This is a variant of `force_genre_by_folder.py` where we may also force
     the `language` using a sub-subfolder.
@@ -16,11 +21,13 @@ def on_item(item, path):
     └── Classical
 
     The first level of folders will force the genre.
-    For example, sropping a file in `Instrumental` would import it with `genre:Instrumental`.
+    For example, dropping a file in `Instrumental` would import it with
+    `genre:Instrumental`.
     The tag value will match the folder name, and you could create as many as you want.
-    The sub-level is optional and may be used to force the `language` tag;
+    The sublevel is optional and may be used to force the `language` tag;
     again the value we put in the tag will be the folder's name
-    (we test that this name is only 3 characters, just in case someone drops accidently a folder).
+    (we test that this name is only 3 characters,
+    just in case someone drops a folder accidentally).
     So dropping a file in `Rap/fra` would import it with `genre:Rap` and
     `language:fra`.
 
@@ -29,18 +36,18 @@ def on_item(item, path):
     `return {}` to still import it and leave tags untouched.
     """
     if not path:
-        _logger.info("No sub-folder, leaving the file for manual import")
+        log.info("No sub-folder, leaving the file for manual import")
         return None
 
     # remove first /
     path = path[1:]
-    path_parts = path.split('/')
+    path_parts = path.split("/")
     custom_tags = {}
 
     if len(path_parts) >= 1:
-        custom_tags['genre'] = path_parts[0]
+        custom_tags["genre"] = path_parts[0]
 
     if len(path_parts) >= 2 and len(path_parts[1]) == 3:
-        custom_tags['language'] = path_parts[1]
+        custom_tags["language"] = path_parts[1]
 
     return custom_tags
