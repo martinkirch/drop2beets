@@ -1,9 +1,10 @@
 from time import sleep
 from watchdog.events import FileSystemEvent, FileMovedEvent
-from beetsplug.drop2beets import Drop2BeetsHandler
+from beetsplug.drop2beets import Drop2BeetsSingletonHandler
 
 def test_debounce(monkeypatch):
-    handler = Drop2BeetsHandler(None)
+    debounce_window = 10
+    handler = Drop2BeetsSingletonHandler(None, debounce_window, None)
 
     imported_paths = None
     def fake_import (lib, paths, query):
@@ -23,13 +24,13 @@ def test_debounce(monkeypatch):
     handler.try_to_import()
     assert imported_paths is None
 
-    sleep(Drop2BeetsHandler.DEBOUNCE_WINDOW / 2.)
+    sleep(debounce_window / 2.)
     handler.on_any_event(FileMovedEvent("/some/store/songB.flac", "some/songB.flac"))
     imported_paths = None
     handler.try_to_import()
     assert imported_paths is None
 
-    sleep(Drop2BeetsHandler.DEBOUNCE_WINDOW / 2. + 0.01)
+    sleep(debounce_window / 2. + 0.01)
     handler.on_any_event(FileSystemEvent("some/songB.flac"))
     imported_paths = None
     handler.try_to_import()
@@ -37,12 +38,12 @@ def test_debounce(monkeypatch):
     # new events on songA should be ignored because they're likely caused by Beets' import
     handler.on_any_event(FileSystemEvent("some/songA.flac"))
 
-    sleep(Drop2BeetsHandler.DEBOUNCE_WINDOW / 2. + 0.01)
+    sleep(debounce_window / 2. + 0.01)
     imported_paths = None
     handler.try_to_import()
     assert imported_paths is None
 
-    sleep(Drop2BeetsHandler.DEBOUNCE_WINDOW + 0.01)
+    sleep(debounce_window + 0.01)
     imported_paths = None
     handler.try_to_import()
     assert imported_paths == ["some/songB.flac"]
