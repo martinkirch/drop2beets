@@ -1,16 +1,17 @@
 from __future__ import annotations
+
 import logging
 import os
 import subprocess
 from os.path import expanduser
 from time import time
 
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent, FileMovedEvent
-
 from beets import config
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand
+from watchdog.events import FileMovedEvent, FileSystemEvent, FileSystemEventHandler
+from watchdog.observers import Observer
+
 try:
     from beets.ui.commands.import_ import import_files
 except ImportError:
@@ -33,6 +34,7 @@ Restart=on-failure
 WantedBy=default.target
 """
 
+
 class Drop2BeetsDefaultHandler(FileSystemEventHandler):
     """
     This class handles events in drop2beets' default target folder.
@@ -43,7 +45,8 @@ class Drop2BeetsDefaultHandler(FileSystemEventHandler):
     example:
      - moving a file to the watched folder fires only FileCreatedEvent
      - moving a file *in* the watched folder fires FileMovedEvent
-     - (s)cp a file to the watched folder fires FileCreatedEvent/FileModifiedEvent/FileClosedEvent
+     - (s)cp a file to the watched folder fires
+       FileCreatedEvent/FileModifiedEvent/FileClosedEvent
     also, starting the importation might fire an event on the file too.
 
     In the default dropbox, all events are debounced together on the root
@@ -52,7 +55,7 @@ class Drop2BeetsDefaultHandler(FileSystemEventHandler):
     waits until the whole tree has settled before triggering a single import.
     """
 
-    def __init__(self, dropbox_path, debounce_window:int, lib):
+    def __init__(self, dropbox_path, debounce_window: int, lib):
         self.dropbox_path = dropbox_path
         self.debounce_window = debounce_window
         self.lib = lib
@@ -61,8 +64,8 @@ class Drop2BeetsDefaultHandler(FileSystemEventHandler):
 
     def try_to_import(self):
         """
-        Import paths that had no event for a few seconds (following self.debounce_window).
-        Cleanup paths that have been imported.
+        Import paths that had no event for a few seconds (following
+        self.debounce_window). Cleanup paths that have been imported.
         """
         if self.debounce:
             limit = time() - self.debounce_window
@@ -74,7 +77,7 @@ class Drop2BeetsDefaultHandler(FileSystemEventHandler):
                     _logger.info("Processing %s", path)
                     import_files(self.lib, [path], None)
 
-    def on_any_event(self, event:FileSystemEvent):
+    def on_any_event(self, event: FileSystemEvent):
         _logger.debug("got %r", event)
         debounce_path = self._get_debounce_path(event)
         if debounce_path:
@@ -82,8 +85,9 @@ class Drop2BeetsDefaultHandler(FileSystemEventHandler):
             if current > 0:
                 self.debounce[debounce_path] = time()
 
-    def _get_debounce_path(self, event:FileSystemEvent):
+    def _get_debounce_path(self, event: FileSystemEvent):
         return self.dropbox_path
+
 
 class Drop2BeetsSingletonHandler(Drop2BeetsDefaultHandler):
     """
@@ -99,7 +103,7 @@ class Drop2BeetsSingletonHandler(Drop2BeetsDefaultHandler):
     imported on its own after its own stream of events has settled.
     """
 
-    def _get_debounce_path(self, event:FileSystemEvent):
+    def _get_debounce_path(self, event: FileSystemEvent):
         if event and not event.is_directory:
             if isinstance(event, FileMovedEvent):
                 return event.dest_path
@@ -107,38 +111,50 @@ class Drop2BeetsSingletonHandler(Drop2BeetsDefaultHandler):
                 return event.src_path
         return None
 
-class Drop2BeetsPlugin(BeetsPlugin):
 
+class Drop2BeetsPlugin(BeetsPlugin):
     def __init__(self):
         super(Drop2BeetsPlugin, self).__init__()
         self.observer = None
         self.attributes = {}
-        self.debounce_window = int(self.config['debounce_window'].as_number()) \
-            if self.config['debounce_window'].exists() else 10
+        self.debounce_window = (
+            int(self.config["debounce_window"].as_number())
+            if self.config["debounce_window"].exists()
+            else 10
+        )
         self.dropbox_paths = {
             key: self._normalize_path(p.as_filename())
-            for key in ['default', 'singleton']
-            if (p := self.config['dropbox_paths'][key]).exists()
+            for key in ["default", "singleton"]
+            if (p := self.config["dropbox_paths"][key]).exists()
         }
         # Fallback to drop2beets.dropbox_path. Will be removed in the future.
         if len(self.dropbox_paths) == 0:
-            _logger.warning("The 'drop2beets.dropbox_path' config is deprecated, "
-                          "use 'drop2beets.dropbox_paths.singleton' instead")
-            self.dropbox_paths['singleton'] = self._normalize_path(self.config['dropbox_path'].as_filename())
+            _logger.warning(
+                "The 'drop2beets.dropbox_path' config is deprecated, "
+                "use 'drop2beets.dropbox_paths.singleton' instead"
+            )
+            self.dropbox_paths["singleton"] = self._normalize_path(
+                self.config["dropbox_path"].as_filename()
+            )
 
         try:
-            exec(self.config['on_item'].get(), globals())
-            self.on_item = on_item
-        except:
+            exec(self.config["on_item"].get(), globals())
+            self.on_item = on_item  # noqa: F821 the config string defines `on_item()`
+        except Exception as exn:
+            _logger.warning("Could not parse 'on_item' config function:")
+            _logger.exception(exn)
             self.on_item = lambda item, path: dict()
 
-        self._command_dropbox = Subcommand('dropbox',
-            help="Start watching %s for files to import automatically" %
-                self.dropbox_paths.values())
+        self._command_dropbox = Subcommand(
+            "dropbox",
+            help="Start watching %s for files to import automatically"
+            % self.dropbox_paths.values(),
+        )
         self._command_dropbox.func = self._main
 
-        self._command_install = Subcommand('install_dropbox',
-            help="Install drop2beets as a user-lever systemd service")
+        self._command_install = Subcommand(
+            "install_dropbox", help="Install drop2beets as a user-lever systemd service"
+        )
         self._command_install.func = self._install
 
     def commands(self):
@@ -146,18 +162,18 @@ class Drop2BeetsPlugin(BeetsPlugin):
 
     def on_import_begin(self, session):
         if len(session.paths) == 1 and os.path.isfile(session.paths[0]):
-            session.config['singletons'] = True
-        config['import']['quiet'] = True
+            session.config["singletons"] = True
+        config["import"]["quiet"] = True
         self.attributes = {}
 
     def on_import_task_created(self, task, session):
         # Some ImportTasks, like progress updates, have no item; ignore them
-        if not hasattr(task, 'items') and not hasattr(task, 'item'):
+        if not hasattr(task, "items") and not hasattr(task, "item"):
             return [task]
         items = task.items if task.is_album else [task.item]
         valid_items = []
         for item in items:
-            path = str(item.path, 'utf-8', 'ignore')
+            path = str(item.path, "utf-8", "ignore")
             path_type = self._get_path_type(path)
 
             if not path_type:
@@ -165,7 +181,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
                 continue
 
             folder = os.path.dirname(path)
-            dropbox_path = folder[len(self.dropbox_paths[path_type]):]
+            dropbox_path = folder[len(self.dropbox_paths[path_type]) :]
             self.attributes[path] = self.on_item(item, dropbox_path)
             if self.attributes[path] is None:
                 _logger.info("Importation of %s skipped by on_item", path)
@@ -184,33 +200,37 @@ class Drop2BeetsPlugin(BeetsPlugin):
         return [task]
 
     def on_item_imported(self, lib, item):
-        path = str(item.path, 'utf-8', 'ignore')
+        path = str(item.path, "utf-8", "ignore")
         if path in self.attributes:
             item.update(self.attributes[path])
             item.store()
 
     def _main(self, lib, opts, args):
         try:
-            log_path = self.config['log_path'].as_filename()
-        except:
+            log_path = self.config["log_path"].as_filename()
+        except Exception as exn:
+            _logger.warning("Could not parse 'log_path' configuration:")
+            _logger.exception(exn)
             log_path = None
         logging.basicConfig(
             filename=log_path,
             level=logging.WARNING,
-            format="%(asctime)s [%(filename)s:%(lineno)s] %(levelname)s %(message)s"
+            format="%(asctime)s [%(filename)s:%(lineno)s] %(levelname)s %(message)s",
         )
         _logger.setLevel(logging.INFO)
-        logging.getLogger('beets').addHandler(logging.getLogger().handlers[0])
+        logging.getLogger("beets").addHandler(logging.getLogger().handlers[0])
 
-        self.register_listener('import_begin', self.on_import_begin)
-        self.register_listener('import_task_created', self.on_import_task_created)
-        self.register_listener('item_imported', self.on_item_imported)
+        self.register_listener("import_begin", self.on_import_begin)
+        self.register_listener("import_task_created", self.on_import_task_created)
+        self.register_listener("item_imported", self.on_item_imported)
 
         self.observer = Observer()
         handlers = {
-            path_value: (Drop2BeetsSingletonHandler(path_value, self.debounce_window, lib)
-                         if path_type == 'singleton'
-                         else Drop2BeetsDefaultHandler(path_value, self.debounce_window, lib))
+            path_value: (
+                Drop2BeetsSingletonHandler(path_value, self.debounce_window, lib)
+                if path_type == "singleton"
+                else Drop2BeetsDefaultHandler(path_value, self.debounce_window, lib)
+            )
             for path_type, path_value in self.dropbox_paths.items()
         }
         for path, handler in handlers.items():
@@ -229,7 +249,7 @@ class Drop2BeetsPlugin(BeetsPlugin):
     def _install(self, lib, opts, args):
         logging.basicConfig(
             level=logging.INFO,
-            format="%(asctime)s [%(filename)s:%(lineno)s] %(levelname)s %(message)s"
+            format="%(asctime)s [%(filename)s:%(lineno)s] %(levelname)s %(message)s",
         )
         beet_path = subprocess.getoutput("which beet")
         print(f"beet found in {beet_path}")
@@ -245,7 +265,8 @@ class Drop2BeetsPlugin(BeetsPlugin):
         subprocess.run(["loginctl", "enable-linger", os.getlogin()], check=True)
 
         print("""
-        All done ! Drop2beets is running and will run again when rebooting (we enabled systemd's lingering)
+        All done ! Drop2beets is running and will run again when rebooting
+        (we enabled systemd's lingering)
 
         You can run
             systemctl --user start|stop|restart|status drop2beets

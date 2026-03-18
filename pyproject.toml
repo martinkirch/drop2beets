@@ -22,7 +22,8 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest (>=9.0.1,<10.0.0)",
-    "beets (>=2.5.1,<3.0.0)"
+    "beets (>=2.5.1,<3.0.0)",
+    "ruff (>=0.15.6,<0.16.0)"
 ]
 
 [tool.poetry]
@@ -39,3 +40,49 @@ build-backend = "poetry.core.masonry.api"
 pythonpath = [
   "."
 ]
+
+### Ruff configuration copy-pasted from Beets (setting line-length at 88)
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+exclude = [
+    "drop2beets/examples/**"
+]
+
+[tool.ruff.lint]
+select = [
+    # "ARG", # flake8-unused-arguments
+    # "C4", # flake8-comprehensions
+    "E", # pycodestyle
+    "F", # pyflakes
+    # "B", # flake8-bugbear
+    "I", # isort
+    "N", # pep8-naming
+    "PT", # flake8-pytest-style
+    # "RUF", # ruff
+    # "UP", # pyupgrade
+    "TCH", # flake8-type-checking
+    "W", # pycodestyle
+]
+ignore = [
+  "TC006"  # no need to quote 'cast's since we use 'from __future__ import annotations'
+]
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 88
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+parametrize-names-type = "csv"
+
+[tool.ruff.lint.flake8-unused-arguments]
+ignore-variadic-names = true
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = ["cached_classproperty"]
+extend-ignore-names = ["assert*", "cached_classproperty"]

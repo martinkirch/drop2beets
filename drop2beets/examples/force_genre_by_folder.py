@@ -25,10 +25,10 @@ def on_item(item, path):
 
     # remove first /
     path = path[1:]
-    path_parts = path.split('/')
+    path_parts = path.split("/")
     custom_tags = {}
 
     if len(path_parts) == 1:
-        custom_tags['genre'] = path_parts[0]
+        custom_tags["genre"] = path_parts[0]
 
     return custom_tags

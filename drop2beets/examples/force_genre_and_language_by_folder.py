@@ -34,13 +34,13 @@ def on_item(item, path):
 
     # remove first /
     path = path[1:]
-    path_parts = path.split('/')
+    path_parts = path.split("/")
     custom_tags = {}
 
     if len(path_parts) >= 1:
-        custom_tags['genre'] = path_parts[0]
+        custom_tags["genre"] = path_parts[0]
 
     if len(path_parts) >= 2 and len(path_parts[1]) == 3:
-        custom_tags['language'] = path_parts[1]
+        custom_tags["language"] = path_parts[1]
 
     return custom_tags
