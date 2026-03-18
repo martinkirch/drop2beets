@@ -1,6 +1,6 @@
 # drop2beets
 
-A [Beets](http://beets.io/) plug-in that imports singles as soon as they are dropped in a folder.
+A [Beets](http://beets.io/) plug-in that imports files as soon as they are dropped in a folder.
 
 You can provide a function to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
@@ -21,12 +21,14 @@ pip install drop2beets
 ```
 
 Enable and configure the plug-in by running `beet config -e` and set at least
-one of default or singleton path to the "dropbox" folder.
+one of `default` or `singleton` in `dropbox_paths`.
+`debounce_window` defaults to 10, but we advise you set to at least 60 if you'd like to
+import albums.
 
 ```yaml
 plugins: drop2beets
 drop2beets:
-    debounce_window: 10 # Seconds to wait for events to stop before importing. Should be set to at least 60 when importing albums. Default: 10
+    debounce_window: 10 # Seconds to wait for file events to stop before importing.
     dropbox_paths:
         default: ~/beets-dropbox/albums
         singleton: ~/beets-dropbox/singles
@@ -70,7 +72,7 @@ drop2beets:
 
 Now you're ready to test by calling `beet dropbox` on the command line and
 dropping a few files in the folder.
-Note that drop2beets starts 10 seconds after the last event it received about a file,
+Note that drop2beets starts a few seconds after the last event it received about a file,
 to ensure that the file has been copied or moved completely.
 Hit Ctrl+C to close the script.
 
