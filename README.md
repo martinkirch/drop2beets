@@ -4,7 +4,7 @@ A [Beets](http://beets.io/) plug-in that imports files as soon as they are dropp
 
 You can provide a function to set meta-data
 or custom attributes depending on the sub-folder in which the file has been dropped.
-The [examples](https://github.com/martinkirch/drop2beets/tree/master/examples)
+The [examples](https://github.com/martinkirch/drop2beets/tree/master/drop2beets/examples)
 folder contains some examples of `on_item` functions you may
 adapt to your needs.
 
